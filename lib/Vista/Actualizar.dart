@@ -2,9 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:sqlite/Constantes.dart';
 import 'package:sqlite/Control/UsuarioDB.dart';
+import '../Control/Mensajes.dart';
 import '../Modelo/Usuario.dart';
+import 'Elementos.dart';
 import 'MenuLateral.dart';
-import 'package:intl/intl.dart';
 
 // ignore: use_key_in_widget_constructors
 class Actualizar extends StatefulWidget {
@@ -21,7 +22,7 @@ class _ActualizarState extends State<Actualizar> {
   final boxBuscar = TextEditingController();
   final boxFecha = TextEditingController();
   String selectedValue = "Genero";
-  bool boxBandera = false;
+  bool band =false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +41,11 @@ class _ActualizarState extends State<Actualizar> {
         child: Column(
       children: [
         campoBusqueda(),
-        campoNombre(),
+        Elementos().campoNombre(boxNombre, false),
         genero(context),
         campoEdad(context),
-        campoEstatura(),
-        campoPeso(),
+        Elementos().campoEstatura(boxEstatura, band),
+        Elementos().campoPeso(boxPeso, band),
         btnActualizar(context),
       ],
     ));
@@ -59,7 +60,7 @@ class _ActualizarState extends State<Actualizar> {
             Flexible(
                 child: TextField(
                     controller: boxBuscar,
-                    decoration: decoracion("Buscar por nombre"))),
+                    decoration: Elementos().decoracionBuscar("Buscar por nombre"))),
             TextButton(
               style: TextButton.styleFrom(
                 primary: Colors.black,
@@ -68,13 +69,19 @@ class _ActualizarState extends State<Actualizar> {
               ),
               onPressed: () async {
                 if (boxBuscar.text.isNotEmpty) {
-                  Usuario nuevo = await UsuarioDB().find(boxBuscar.text);
+                  
+                  if(await UsuarioDB().find(boxBuscar.text)!=null){
+                    Usuario nuevo = await UsuarioDB().find(boxBuscar.text);
                   boxNombre.text = nuevo.nombre.toString();
-                  //selectedValue=nuevo.genero.toString();
+                  selectedValue=nuevo.genero.toString();
                   boxFecha.text = nuevo.genero.toString();
                   boxEdad.text = nuevo.edad.toString();
                   boxPeso.text = nuevo.peso.toString();
                   boxEstatura.text = nuevo.estatura.toString();
+                  setState(() {
+                    band=true;
+                  });
+                  }
                 }
               },
               child: Text("Buscar"),
@@ -83,43 +90,22 @@ class _ActualizarState extends State<Actualizar> {
         ));
   }
 
-  Widget campoNombre() {
-    return Padding(
-        //flatbutton
-        padding: EdgeInsets.only(left: 50, right: 50, top: 30),
-        child: TextField(
-            controller: boxNombre,
-            enabled: boxBandera,
-            decoration: decoracionBox("Nombre")));
-  }
 
-  List<DropdownMenuItem<String>> get dropdownItems {
-    if (boxBandera) {
-      List<DropdownMenuItem<String>> menuItems = [
-        const DropdownMenuItem(value: "Genero", child: Text("Genero")),
-        const DropdownMenuItem(value: "M", child: Text("M")),
-        const DropdownMenuItem(value: "F", child: Text("F")),
-      ];
-      return menuItems;
-    } else {
-      List<DropdownMenuItem<String>> menuItems = [];
-      return menuItems;
-    }
-  }
+
 
   Widget genero(BuildContext context) {
     return Padding(
         padding: EdgeInsets.only(left: 50, right: 50, top: 30),
         child: DropdownButtonFormField(
-          autofocus: boxBandera,
-          items: dropdownItems,
+          autofocus: band,
+          items: Elementos().dropdownItems,
           onChanged: (String? newValue) {
             setState(() {
               selectedValue = newValue!;
             });
           },
           decoration: InputDecoration(
-            enabled: boxBandera,
+            enabled: band,
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Colors.black, width: 3),
               borderRadius: BorderRadius.circular(20),
@@ -142,7 +128,7 @@ class _ActualizarState extends State<Actualizar> {
     return Padding(
         padding: EdgeInsets.only(left: 50, right: 50, top: 30),
         child: TextField(
-          enabled: boxBandera,
+          enabled: band,
           controller: boxEdad, //editing controller of this TextField
           decoration: const InputDecoration(
               enabledBorder: OutlineInputBorder(
@@ -156,54 +142,13 @@ class _ActualizarState extends State<Actualizar> {
               ),
           readOnly: true, //set it true, so that user will not able to edit text
           onTap: () async {
-            DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(
-                    2000), //DateTime.now() - not to allow to choose before today.
-                lastDate: DateTime(2101));
-
-            if (pickedDate != null) {
-              String formattedDate =
-                  DateFormat('yyyy-MM-dd').format(pickedDate);
-              DateTime date3 = DateTime.parse(formattedDate);
-              final date2 = DateTime.now().difference(date3).inDays;
-              int A = date2 ~/ 365;
-              int M = date2 ~/ 30;
-              if (A >= 2) {
-                year = "$A Años";
-              } else {
-                year = "$M Meses";
-              }
-
+          year=await Elementos().funcionFecha(context);
               setState(() {
                 boxEdad.text = year; //set output date to TextField value.
               });
-            } else {
-              print("Date is not selected");
-            }
+            
           },
         ));
-  }
-
-  Widget campoEstatura() {
-    return Padding(
-        //flatbutton
-        padding: EdgeInsets.only(left: 50, right: 50, top: 30),
-        child: TextField(
-            controller: boxEstatura,
-            enabled: boxBandera,
-            decoration: decoracionBox("Estatura")));
-  }
-
-  Widget campoPeso() {
-    return Padding(
-        //flatbutton
-        padding: EdgeInsets.only(left: 50, right: 50, top: 30),
-        child: TextField(
-            controller: boxPeso,
-            enabled: boxBandera,
-            decoration: decoracionBox("Peso")));
   }
 
   Widget btnActualizar(BuildContext context) {
@@ -220,38 +165,39 @@ class _ActualizarState extends State<Actualizar> {
         ),
         onPressed: () async {
           Usuario nuevo = await UsuarioDB().find(boxBuscar.text);
-          print(nuevo.edad);
+          if(camposBacios()){
+            UsuarioDB().update(Usuario(
+              nombre: boxNombre.text,
+              genero: selectedValue,
+              edad: boxEdad.text,
+              peso: double.parse(boxPeso.text),
+              estatura: double.parse(boxEstatura.text)));
+              limpiar();
+              Mensajes().info("Actualizacion exitosa");
+              setState(() {
+                band=false;
+              });
+          }else{
+            Mensajes().info("Campos bacios");
+          }
         },
       ),
     );
   }
 
-  decoracionBox(nombre) {
-    return InputDecoration(
-        labelText: nombre,
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 3, color: Colors.black),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 3, color: Colors.red),
-          borderRadius: BorderRadius.circular(15),
-        ));
+camposBacios() {
+    return boxNombre.text.isNotEmpty & (selectedValue!="Genero")
+    & boxPeso.text.isNotEmpty & boxEstatura.text.isNotEmpty &boxEdad.text.isNotEmpty ;
   }
 
-  decoracion(nombre) {
-    return InputDecoration(
-        labelText: nombre,
-        filled: true,
-        fillColor: Colors.white,
-        prefixIcon: Icon(Icons.search),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 1, color: Colors.black),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 1, color: Colors.white),
-          borderRadius: BorderRadius.circular(15),
-        ));
+  limpiar(){
+    boxEdad.text='';
+    boxNombre.text='';
+    boxPeso.text='';
+    boxEstatura.text='';
+    setState(() {
+          selectedValue = "Genero";
+        });
   }
+
 }

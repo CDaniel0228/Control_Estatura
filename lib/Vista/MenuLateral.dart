@@ -20,7 +20,7 @@ class MenuLateral extends StatelessWidget {
                 color: headerColor),
           ),
           Container(
-            padding: EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(top: kPadiinMenuT),
             child: TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, 'registrar');
@@ -29,17 +29,17 @@ class MenuLateral extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.add_box_outlined,
-                      color: Colors.white,
+                      color: kColorMenuLabel,
                     ),
                     Text(
                       "Registrar",
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                      style: TextStyle(color: kColorMenuLabel, fontSize: 25),
                     )
                   ],
                 )),
           ),
           Container(
-            padding: EdgeInsets.only(top: 30),
+            padding: const EdgeInsets.only(top: kPadiinMenuT),
             child: TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, 'actualizar');
@@ -48,17 +48,17 @@ class MenuLateral extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.update,
-                      color: Colors.white,
+                      color: kColorMenuLabel,
                     ),
                     Text(
                       "Actualizar",
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                      style: TextStyle(color: kColorMenuLabel, fontSize: 25),
                     )
                   ],
                 )),
           ),
           Container(
-            padding: EdgeInsets.only(top: 30),
+            padding: const EdgeInsets.only(top: kPadiinMenuT),
             child: TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, 'eliminar');
@@ -67,17 +67,17 @@ class MenuLateral extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.delete_sweep,
-                      color: Colors.white,
+                      color: kColorMenuLabel,
                     ),
                     Text(
                       "Eliminar",
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                      style: TextStyle(color: kColorMenuLabel, fontSize: 25),
                     )
                   ],
                 )),
           ),
           Container(
-            padding: EdgeInsets.only(top: 50),
+            padding: const EdgeInsets.only(top: kPadiinMenuT),
             child: TextButton(
                 onPressed: () async {
                   //if (await Autentificacion().signedOut()) {
@@ -88,28 +88,28 @@ class MenuLateral extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.history_toggle_off_sharp,
-                      color: Colors.white,
+                      color: kColorMenuLabel,
                     ),
                     Text(
                       "Historial",
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                      style: TextStyle(color: kColorMenuLabel, fontSize: 25),
                     )
                   ],
                 )),
           ),
           Container(
-            padding: EdgeInsets.only(top: 50),
+            padding: const EdgeInsets.only(top: 50),
             child: TextButton(
                 onPressed: () => exit(0),
                 child: Row(
                   children: [
                     Icon(
                       Icons.exit_to_app,
-                      color: Colors.white,
+                      color: kColorMenuLabel,
                     ),
                     Text(
                       "Salir",
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                      style: TextStyle(color: kColorMenuLabel, fontSize: 25),
                     )
                   ],
                 )),

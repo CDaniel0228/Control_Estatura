@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class UsuarioDB extends ConexionDB {
   Future<int> crateItem(Usuario usuario) async {
     final Database db = await initializeDB();
-    final id = await db.insert('Usuarios', usuario.toMap(),
+    final id =  await db.insert('Usuarios', usuario.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
   }
@@ -21,17 +21,10 @@ class UsuarioDB extends ConexionDB {
     return res.isNotEmpty ? Usuario.fromMap(res.first) : null;
   }
 
-  find2(String nombre) async {
-    final Database db = await initializeDB();
-    var res =
-        await db.query("Historial", where: "nombre = ?", whereArgs: [nombre]);
-    return res.isNotEmpty ? Usuario.fromMap(res.first) : null;
-  }
-
-  Future<void> deleteItem(String id) async {
+  Future<void> delete(String nombre) async {
     final Database db = await initializeDB();
     try {
-      await db.delete("Usuarios", where: "id = ?", whereArgs: [id]);
+      await db.delete("Usuarios", where: "nombre = ?", whereArgs: [nombre]);
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }
@@ -40,7 +33,7 @@ class UsuarioDB extends ConexionDB {
   Future<int> update(Usuario note) async {
     final Database db = await initializeDB();
     return db
-        .update("notes", note.toMap(), where: 'id = ?', whereArgs: [note.nombre]);
+        .update("Usuarios", note.toMap(), where: 'nombre = ?', whereArgs: [note.nombre]);
   }
 
 }

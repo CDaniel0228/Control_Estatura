@@ -1,6 +1,8 @@
 // ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:sqlite/Constantes.dart';
+import 'package:sqlite/Control/HistorialDB.dart';
+import 'package:sqlite/Vista/Analisis.dart';
 
 import '../Control/UsuarioDB.dart';
 import '../Modelo/Usuario.dart';
@@ -13,11 +15,10 @@ class Historial extends StatefulWidget {
 }
 
 class _HistorialState extends State<Historial> {
-  final boxNombre = TextEditingController();
-  final boxEdad = TextEditingController();
-  final boxPeso = TextEditingController();
-  final boxEstatura = TextEditingController();
   final boxBuscar = TextEditingController();
+  List<Usuario> listaA = [];
+  List<Usuario> listaB=[];
+  List<List<Usuario>> listaC=[];
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +37,38 @@ class _HistorialState extends State<Historial> {
         child: Column(
       children: [
         campoBusqueda(),
-        campoNombre(),
-        campoEdad(),
-        btnRegistrar(context)],
+        _myListView(context),
+      ],
     ));
   }
 
-   Widget campoBusqueda() {
+  Widget _myListView(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: listaA.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          onTap: () {
+            if (index == 0) {}
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Analisis(listaA),
+              ),
+            );
+          },
+          leading: const Icon(Icons.list),
+          trailing: const Text(
+            "Analizar",
+            style: TextStyle(color: Colors.green, fontSize: 15),
+          ),
+          title: Text(listaA[index].edad.toString()),
+        );
+      },
+    );
+  }
+
+  Widget campoBusqueda() {
     return Container(
         //flatbutton
         padding: EdgeInsets.only(left: 10, right: 10, top: 10),
@@ -60,8 +86,50 @@ class _HistorialState extends State<Historial> {
               ),
               onPressed: () async {
                 if (boxBuscar.text.isNotEmpty) {
-                  Usuario nuevo = await UsuarioDB().find2(boxBuscar.text);
-                  print(nuevo.peso.toString());
+                  if (await HistorialDB().getItems(boxBuscar.text) != null) {
+                    List<Usuario> lista =
+                        await HistorialDB().getItems(boxBuscar.text);
+                      
+                    for (int i = 0; i < lista.length; i++) {
+                      List<String> splitted =
+                          lista.elementAt(i).edad.toString().split(' ');
+                      int num = int.parse(splitted.elementAt(0));
+                      if (num < 3 & splitted.elementAt(1).compareTo("Meses")) {
+                        listaB.add(lista.elementAt(i));
+                        
+                      }
+
+                    }
+                    for (int i = 0; i < lista.length; i++) {
+                      for (int j = 0; j < lista.length; j++) {
+                      List<String> splitted =
+                          lista.elementAt(j).edad.toString().split(' ');
+                      int num = int.parse(splitted.elementAt(0));
+                      if (num < 3 & splitted.elementAt(1).compareTo("Meses")) {
+                        listaB.add(lista.elementAt(i));
+                        
+                      }
+
+                      }
+                        listaC.add(listaB);
+                        
+                    }
+
+                    for (int i = 0; i < lista.length; i++) {
+                      List<String> splitted =
+                          lista.elementAt(i).edad.toString().split(' ');
+                      int num = int.parse(splitted.elementAt(0));
+                      if (num < 3 & splitted.elementAt(1).compareTo("Meses")) {
+                        listaB.add(lista.elementAt(i)); 
+                      }    
+                    }
+                    listaC.add(listaB);
+                    listaB.clear();
+                    
+                    setState(() {
+                      listaA = lista;
+                    });
+                  }
                 }
               },
               child: Text("Buscar"),
@@ -70,64 +138,12 @@ class _HistorialState extends State<Historial> {
         ));
   }
 
-  Widget campoNombre() {
-    return Padding(
-        //flatbutton
-        padding: EdgeInsets.only(left: 50, right: 50, top: 30),
-        child: TextField(
-            controller: boxNombre,
-            decoration: decoracionBox("Resultado")));
-  }
-
-  Widget campoEdad() {
-    return Padding(
-        //flatbutton
-        padding: EdgeInsets.only(left: 50, right: 50, top: 30),
-        child: TextField(
-            controller: boxEdad,
-            decoration: decoracionBox("Observaciones")));
-  }
-
-  
-
-  Widget btnRegistrar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(),
-      width: 150,
-      child: TextButton.icon(
-        icon: const Icon(Icons.analytics),
-        label: const Text("Analisis"),
-        style: TextButton.styleFrom(
-          primary: Colors.black,
-          shape: const BeveledRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(5))),
-        ),
-        onPressed: () async {
-          
-        },
-      ),
-    );
-  }
-
-  decoracionBox(nombre) {
-    return InputDecoration(
-        labelText: nombre,
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 3, color: Colors.black),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 3, color: Colors.red),
-          borderRadius: BorderRadius.circular(15),
-        ));
-  }
-
   decoracion(nombre) {
     return InputDecoration(
         labelText: nombre,
         filled: true,
         fillColor: Colors.white,
-        prefixIcon: Icon(Icons.search),
+        prefixIcon: const Icon(Icons.search),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(width: 1, color: Colors.black),
           borderRadius: BorderRadius.circular(15),
@@ -136,5 +152,38 @@ class _HistorialState extends State<Historial> {
           borderSide: const BorderSide(width: 1, color: Colors.white),
           borderRadius: BorderRadius.circular(15),
         ));
+  }
+
+  listaMeses(lista) {
+    for (int i = 0; i < lista.length; i++) {
+      List<String> splitted = lista.elementAt(i).edad.toString().split(' ');
+      int num = int.parse(splitted.elementAt(0));
+      if (num <= 3 & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }else if (num > 3 || num <= 6 & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }else if (num > 6 || num <= 9 & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }else if (num > 9 || num <= 12 & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }else if (num > 12 || num <= 15 & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }else if (num > 15 || num <= 18 & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }else if (num > 18 & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }
+    }
+  }
+
+  ciclo(lista, n){
+    for (int i = 0; i < lista.length; i++) {
+      List<String> splitted = lista.elementAt(i).edad.toString().split(' ');
+      int num = int.parse(splitted.elementAt(0));
+      if (num <= n & splitted.elementAt(1).compareTo("Meses")) {
+        listaB.add(lista.elementAt(i));
+      }
+    }
+    listaC.add(listaB);
   }
 }

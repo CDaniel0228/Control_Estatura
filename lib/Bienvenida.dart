@@ -1,5 +1,6 @@
 // ignore: file_names
 import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter/widgets.dart';
@@ -15,6 +16,6 @@ class Bienvenida {
         nextScreen: Registrar(),
         //splashTransition: SplashTransition.sizeTransition,
         pageTransitionType: PageTransitionType.rightToLeftWithFade,
-        backgroundColor: backTextColor);
+        backgroundColor: Colors.white);
   }
 }

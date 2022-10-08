@@ -2,6 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:sqlite/Constantes.dart';
 
+import '../Control/Mensajes.dart';
+import '../Control/UsuarioDB.dart';
+import '../Modelo/Usuario.dart';
+import 'Elementos.dart';
 import 'MenuLateral.dart';
 
 class Eliminar extends StatefulWidget {
@@ -16,6 +20,9 @@ class _EliminarState extends State<Eliminar> {
   final boxPeso = TextEditingController();
   final boxEstatura = TextEditingController();
   final boxBuscar = TextEditingController();
+  final boxGenero = TextEditingController();
+    final boxFecha = TextEditingController();
+  bool band =false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,29 +41,59 @@ class _EliminarState extends State<Eliminar> {
         child: Column(
       children: [
         campoBusqueda(),
-        campoNombre(),
+        Elementos().campoNombre(boxNombre, band),
+        genero(),
         campoEdad(),
-        campoEstatura(),
-        campoPeso(),
-        btnRegistrar(context)],
+        Elementos().campoEstatura(boxEstatura, band),
+        Elementos().campoPeso(boxPeso, band),
+        btnEliminar(context),],
     ));
   }
 
   Widget campoBusqueda() {
-    return Padding(
+    return Container(
         //flatbutton
-        padding: EdgeInsets.only(left: 20, right: 20),
-        child: TextField(
-            controller: boxBuscar, decoration: decoracion("Buscar por nombre")));
+        padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+        child: Row(
+          children: [
+            Flexible(
+                child: TextField(
+                    controller: boxBuscar,
+                    decoration: Elementos().decoracionBuscar("Buscar por nombre"))),
+            TextButton(
+              style: TextButton.styleFrom(
+                primary: Colors.black,
+                shape: const BeveledRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5))),
+              ),
+              onPressed: () async {
+                if (boxBuscar.text.isNotEmpty) {
+                  
+                  if(await UsuarioDB().find(boxBuscar.text)!=null){
+                    Usuario nuevo = await UsuarioDB().find(boxBuscar.text);
+                  boxNombre.text = nuevo.nombre.toString();
+                  boxGenero.text=nuevo.genero.toString();
+                  boxFecha.text = nuevo.genero.toString();
+                  boxEdad.text = nuevo.edad.toString();
+                  boxPeso.text = nuevo.peso.toString();
+                  boxEstatura.text = nuevo.estatura.toString();
+                  
+                  }
+                }
+              },
+              child: Text("Buscar"),
+            )
+          ],
+        ));
   }
 
-  Widget campoNombre() {
+
+  Widget genero() {
     return Padding(
         //flatbutton
         padding: EdgeInsets.only(left: 50, right: 50, top: 30),
         child: TextField(
-            controller: boxNombre,
-            decoration: decoracionBox("Nombre")));
+            controller: boxGenero, enabled: band, decoration: Elementos().decoracionBox("Genero")));
   }
 
   Widget campoEdad() {
@@ -64,34 +101,15 @@ class _EliminarState extends State<Eliminar> {
         //flatbutton
         padding: EdgeInsets.only(left: 50, right: 50, top: 30),
         child: TextField(
-            controller: boxEdad,
-            decoration: decoracionBox("Edad")));
+            controller: boxEdad, enabled: band, decoration: Elementos().decoracionBox("Edad")));
   }
 
-  Widget campoEstatura() {
-    return Padding(
-        //flatbutton
-        padding: EdgeInsets.only(left: 50, right: 50, top: 30),
-        child: TextField(
-            controller: boxEstatura,
-            decoration: decoracionBox("Estatura")));
-  }
-
-  Widget campoPeso() {
-    return Padding(
-        //flatbutton
-        padding: EdgeInsets.only(left: 50, right: 50, top: 30),
-        child: TextField(
-            controller: boxPeso,
-            decoration: decoracionBox("Peso")));
-  }
-
-  Widget btnRegistrar(BuildContext context) {
+  Widget btnEliminar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(),
       width: 150,
       child: TextButton.icon(
-        icon: const Icon(Icons.delete_forever),
+        icon: const Icon(Icons.delete),
         label: const Text("Eliminar"),
         style: TextButton.styleFrom(
           primary: Colors.black,
@@ -99,38 +117,29 @@ class _EliminarState extends State<Eliminar> {
               borderRadius: BorderRadius.all(Radius.circular(5))),
         ),
         onPressed: () async {
-          
+          if(camposBacios()){
+            if(UsuarioDB().delete(boxNombre.text)!=null){
+              limpiar();
+              Mensajes().info("Eliminacion exitosa");
+            }
+             
+          }else{
+            Mensajes().info("Campos bacios");
+          }
         },
       ),
     );
   }
 
-  decoracionBox(nombre) {
-    return InputDecoration(
-        labelText: nombre,
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 3, color: Colors.black),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 3, color: Colors.red),
-          borderRadius: BorderRadius.circular(15),
-        ));
+camposBacios() {
+    return boxNombre.text.isNotEmpty ;
   }
 
-  decoracion(nombre) {
-    return InputDecoration(
-        labelText: nombre,
-        filled: true,
-        fillColor: Colors.white,
-        prefixIcon: Icon(Icons.search),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 1, color: Colors.black),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(width: 1, color: Colors.white),
-          borderRadius: BorderRadius.circular(15),
-        ));
+  limpiar(){
+    boxEdad.text='';
+    boxNombre.text='';
+    boxPeso.text='';
+    boxEstatura.text='';
+    boxGenero.text='';
   }
 }
